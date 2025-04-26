@@ -35,17 +35,17 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_marginEnd="12dp"
+            android:paddingBottom="12dp"
             android:hint="Label"
             app:errorEnabled="true">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/labelInput"
+            <Spinner
+                android:id="@+id/spinner"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:drawableStart="@drawable/ic_label"
+                android:background="@drawable/spinner_border"
                 android:drawablePadding="12dp"
-                android:inputType="text"
-                android:maxLines="1" />
+                android:spinnerMode="dropdown" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -61,6 +61,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/amountInput"
                 android:layout_width="match_parent"
+                android:paddingTop="8dp"
                 android:layout_height="48dp"
                 android:drawableStart="@drawable/ic_money"
                 android:drawablePadding="12dp"

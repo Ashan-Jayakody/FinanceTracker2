@@ -2,11 +2,13 @@ package com.example.myfinance
 
 
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import androidx.room.Room
@@ -20,20 +22,20 @@ class AddTransactionActivity2 : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_add_transaction2)
 
-        val labelInput = findViewById<EditText>(R.id.labelInput)
         val amountInput = findViewById<EditText>(R.id.amountInput)
         val descriptionInput = findViewById<EditText>(R.id.descriptionInput)
         val labelLayout = findViewById<TextInputLayout>(R.id.labelLayout)
         val amountLayout = findViewById<TextInputLayout>(R.id.amountLayout)
         val addTransactionBtn = findViewById<Button>(R.id.addTransactionBtn)
+        val spinner = findViewById<Spinner>(R.id.spinner)
+
+        val categories = listOf("Food", "Transport", "Shopping", "Entertainment", "Others")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        spinner.adapter = adapter
 
 
-        // Remove error when user starts typing
-        labelInput.addTextChangedListener {
-            if (it!!.isNotEmpty()) {
-                labelLayout.error = null
-            }
-        }
 
         amountInput.addTextChangedListener {
             if (it!!.isNotEmpty()) {
@@ -43,18 +45,15 @@ class AddTransactionActivity2 : AppCompatActivity() {
 
         // Handle transaction addition
         addTransactionBtn.setOnClickListener {
-            val label: String = labelInput.text.toString().trim()
+            val category = spinner.selectedItem.toString()
             val amount: Double? = amountInput.text.toString().toDoubleOrNull()
             val description: String = descriptionInput.text.toString().trim()
 
-            if (label.isEmpty()) {
-                labelLayout.error = "Please enter a valid label"
-            }
 
             if (amount == null) {
                 amountLayout.error = "Please enter a valid amount"
             } else {
-                val transaction = Transaction(0, label, amount, description)
+                val transaction = Transaction(0, category, amount, description)
                 insert(transaction)
 
             }
