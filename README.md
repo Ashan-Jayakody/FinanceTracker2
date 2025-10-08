@@ -10,6 +10,10 @@ FinanceTracker2-Budget-Buddy is a personal finance tracking application built en
 - **User-Friendly UI:** Intuitive design for quick navigation and data entry.
 - **Secure Data:** Your financial information is stored securely.
 
+![App Screenshot](Screenshot%202025-10-08%20161200.png)
+![App Screenshot](Screenshot%202025-10-08%20161252.png)
+![App Screenshot](Screenshot%202025-10-08%20161437.png)
+
 ## Getting Started
 
 ### Prerequisites
