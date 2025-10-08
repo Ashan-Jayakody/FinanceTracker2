@@ -93,31 +93,45 @@ class MainActivity : ComponentActivity() {
 
     private fun fetchAll() {
         lifecycleScope.launch(Dispatchers.IO) {
-            val allTransactions = db.transactionDao().getAll()
+            try {
+                val allTransactions = db.transactionDao().getAll()
 
-            withContext(Dispatchers.Main) {
-                transactions.clear()
-                transactions.addAll(allTransactions)
-                transactionAdapter.setData(transactions)
-                updateDashboard()
-                showCategorySummary()
+                withContext(Dispatchers.Main) {
+                    try {
+                        transactions.clear()
+                        transactions.addAll(allTransactions)
+                        transactionAdapter.setData(transactions)
+                        updateDashboard()
+                        showCategorySummary()
+                    } catch (e: Exception) {
+                        Toast.makeText(this@MainActivity, "Error updating UI: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, "Error fetching transactions: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
 
     private fun updateDashboard() {
-        val totalIncome = transactions.filter { it.amount > 0 }.sumOf { it.amount }
-        totalExpense = transactions.filter { it.amount < 0 }.sumOf { kotlin.math.abs(it.amount) }
+        try {
+            val totalIncome = transactions.filter { it.amount > 0 }.sumOf { it.amount }
+            totalExpense = transactions.filter { it.amount < 0 }.sumOf { kotlin.math.abs(it.amount) }
 
-        // Update totalBalance based on currentBudget and totalExpense
-        val totalBalance = currentBudget - totalExpense
+            // Update totalBalance based on currentBudget and totalExpense
+            val totalBalance = currentBudget - totalExpense
 
-        expense.text = "$${"%.2f".format(totalExpense)}"
-        balance.text = "$${"%.2f".format(totalBalance)}"
+            expense.text = "$${"%.2f".format(totalExpense)}"
+            balance.text = "$${"%.2f".format(totalBalance)}"
 
-        // Check if budget is exceeded
-        if (totalExpense > currentBudget) {
-            showBudgetExceededWarning(totalExpense, currentBudget)
+            // Check if budget is exceeded
+            if (totalExpense > currentBudget) {
+                showBudgetExceededWarning(totalExpense, currentBudget)
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error updating dashboard: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -137,17 +151,21 @@ class MainActivity : ComponentActivity() {
 
     //display categorical wise expenses
     private fun showCategorySummary() {
-        val categorySummary = transactions
-            .filter { it.amount < 0 }
-            .groupBy { it.label }
-            .mapValues { entry -> entry.value.sumOf { kotlin.math.abs(it.amount) } }
+        try {
+            val categorySummary = transactions
+                .filter { it.amount < 0 }
+                .groupBy { it.label }
+                .mapValues { entry -> entry.value.sumOf { kotlin.math.abs(it.amount) } }
 
-        val summaryText = categorySummary.entries.joinToString("\n\n") { (category, total) ->
-            "$category: $${"%.2f".format(total)}"
+            val summaryText = categorySummary.entries.joinToString("\n\n") { (category, total) ->
+                "$category: $${"%.2f".format(total)}"
+            }
+
+            val summaryTextView = findViewById<TextView>(R.id.summaryTextView)
+            summaryTextView.text = summaryText
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error showing category summary: ${e.message}", Toast.LENGTH_SHORT).show()
         }
-
-        val summaryTextView = findViewById<TextView>(R.id.summaryTextView)
-        summaryTextView.text = summaryText
     }
 
     private fun showSetBudgetDialog() {
@@ -174,22 +192,30 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun updateBudget(newBudget: Double) {
-        currentBudget = newBudget
+        try {
+            currentBudget = newBudget
 
-        // Save to SharedPreferences
-        val sharedPref = getSharedPreferences("MyFinancePrefs", MODE_PRIVATE)
-        with(sharedPref.edit()) {
-            putFloat("budget", newBudget.toFloat())
-            apply()
+            // Save to SharedPreferences
+            val sharedPref = getSharedPreferences("MyFinancePrefs", MODE_PRIVATE)
+            with(sharedPref.edit()) {
+                putFloat("budget", newBudget.toFloat())
+                apply()
+            }
+
+            budget.text = "$${"%.2f".format(currentBudget)}"
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error updating budget: ${e.message}", Toast.LENGTH_SHORT).show()
         }
-
-        budget.text = "$${"%.2f".format(currentBudget)}"
     }
 
     private fun loadBudget() {
-        val sharedPref = getSharedPreferences("MyFinancePrefs", MODE_PRIVATE)
-        currentBudget = sharedPref.getFloat("budget", 0f).toDouble()
+        try {
+            val sharedPref = getSharedPreferences("MyFinancePrefs", MODE_PRIVATE)
+            currentBudget = sharedPref.getFloat("budget", 0f).toDouble()
 
-        budget.text = "$${"%.2f".format(currentBudget)}"
+            budget.text = "$${"%.2f".format(currentBudget)}"
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error loading budget: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 }
